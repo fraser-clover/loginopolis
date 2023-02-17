@@ -26,11 +26,9 @@ app.get('/', async (req, res, next) => {
 app.post('/register', async (req, res, next) => {
    try {
         const { username, password } = req.body;
-        
         const hashedPw = await hashPassword(password, 9);
-        let {id} = await User.create({username: username, password: hashedPw});
-        res.send({ message: "success", username})
-        
+        let newUser = await User.create({username: username, password: hashedPw});
+        res.send(`successfully created user ${username}`);
 
     } catch (error) {
         console.log(error);
@@ -43,22 +41,23 @@ app.post('/register', async (req, res, next) => {
 
 app.post('/login', async (req, res, next) => {
   try {
-
       const { username, password } = req.body;
       const [foundUser] = await User.findAll({where: {username}});
-
       if(!foundUser) {
+
         res.sendStatus(401)
+
       } else {
+
         const isMatch = await bcrypt.compare(password, foundUser.password);
+
         if(isMatch){
-          res.send({message: 'success', username})
+          res.send(`successfully logged in user ${username}`);
         } else {
-          res.sendStatus(401)
+          return res.status(401).send('incorrect username or password')
         }
-       
-      }
-      
+
+      }    
   } catch(error) {
       console.log(error);
   }
