@@ -63,5 +63,25 @@ app.post('/login', async (req, res, next) => {
   }
 })
 
+app.get('/me', async (req, res) => { 
+  try {
+    const { username, password } = req.headers;
+    const [requestedUser] = await User.findAll({where: {username}});
+      if(!requestedUser) {
+        res.sendStatus(401)
+      } else {
+        const isMatch = await bcrypt.compare(password, foundUser.password);
+
+        if(isMatch){
+          res.send(requestedUser);
+        } else {
+          return res.status(401).send('incorrect username or password')
+        }
+      }
+  } catch(error) {
+      console.log(error);
+  }
+}
+)
 // we export the app, not listening in here, so that we can run tests
 module.exports = app;
